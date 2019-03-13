@@ -1,0 +1,22 @@
+{
+  "name": "tag-standards",
+  "version": "0.0.1",
+  "description": "coding standards for tag js projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grantglidewell/tag-standards.git"
+  },
+  "author": "Third and Grove <https://www.thirdandgrove.com>",
+  "contributors": [
+    "Grant Glidewell <grant@thirdandgrove.com>"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/grantglidewell/tag-standards/issues"
+  },
+  "homepage": "https://github.com/grantglidewell/tag-standards#readme"
+}
