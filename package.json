@@ -14,6 +14,9 @@
   "contributors": [
     "Grant Glidewell <grant@thirdandgrove.com>"
   ],
+  "bin": {
+    "tag-standards": "./index.js"
+  },
   "preferGlobal": true,
   "license": "ISC",
   "bugs": {
