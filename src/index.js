@@ -10,7 +10,11 @@ const colors = require('./colors');
 const destDir = resolve(process.cwd());
 
 module.exports = async () => {
-  console.log(colors.FgGreen, `Working in project directory: ${destDir}`);
+  console.log(
+    colors.Reset,
+    colors.FgCyan,
+    `Working in project directory: ${destDir}`
+  );
 
   let packageJSON;
   try {
@@ -22,6 +26,11 @@ module.exports = async () => {
   }
 
   // check for dependencies
+  console.log(
+    colors.Reset,
+    colors.FgCyan,
+    'Checking for existing dependencies'
+  );
   const requiredDeps = resolveDeps(packageJSON);
 
   if (!requiredDeps.length) {
@@ -49,9 +58,9 @@ module.exports = async () => {
         );
       });
   }
-  console.log('Copying configuration files');
+  console.log(colors.Reset, colors.FgCyan, 'Copying configuration files');
   // TODO: copy configs
-  console.log('Modifying package.json');
+  console.log(colors.Reset, colors.FgCyan, 'Modifying package.json');
   // modify package with appropriate scripts
   // tests?
 };

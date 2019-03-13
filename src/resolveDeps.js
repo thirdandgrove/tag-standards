@@ -15,7 +15,7 @@ module.exports = packageJSON => {
 
   const installQueue = tagDeps.filter(dep =>
     existingDeps[dep]
-      ? console.log(colors.FgYellow, `${dep} Installed, skipping.`)
+      ? console.log(colors.FgYellow, `${dep} is installed, skipping.`)
       : dep
   );
 
