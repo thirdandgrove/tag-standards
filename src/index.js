@@ -51,11 +51,21 @@ module.exports = async () => {
     // check for yarn
     const hasYarn = (cwd = process.cwd()) =>
       existsSync(resolve(cwd, 'yarn.lock'));
+
     const installCmd = hasYarn
       ? `yarn add -D ${requiredDeps.join(' ')}`
       : `npm i -D ${requiredDeps.join(' ')}`;
+
+    // change working directory
+    try {
+      process.chdir(destDir);
+      console.log(colors.FgGreen, `New directory: ${process.cwd()}`);
+    } catch (err) {
+      console.log(colors.FgRed, `chdir: ${err}`);
+      return;
+    }
     // install the required dependencies
-    await exec(installCmd, { cwd: destDir })
+    await exec(installCmd)
       .then(() => {
         console.log(colors.FgGreen, 'Dependencies installed successfully');
       })
@@ -99,6 +109,10 @@ module.exports = async () => {
     modifiedPackage.husky = tagStandardsPackage.husky;
     // add lint script
     modifiedPackage.scripts.lint = tagStandardsPackage.scripts.lint;
+    modifiedPackage.devDependencies = {
+      ...tagStandardsPackage.devDependencies,
+      ...modifiedPackage.devDependencies,
+    };
     writeFileSync(
       resolve(destDir, 'package.json'),
       JSON.stringify(modifiedPackage, null, 2)
