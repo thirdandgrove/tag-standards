@@ -6,16 +6,15 @@ const exec = util.promisify(require('child_process').exec);
 
 const resolveDeps = require('./resolveDeps');
 const colors = require('./colors');
+const stdVer = require('../package.json').version;
 
 const destDir = resolve(process.cwd());
 
 module.exports = async () => {
-  console.log(
-    colors.Reset,
-    colors.FgCyan,
-    `Working in project directory: ${destDir}`
-  );
+  console.log(colors.FgCyan, `TAG-STANDARDS VERSION: ${stdVer}`);
+  console.log(colors.FgCyan, `Working in project directory: ${destDir}`);
 
+  // Read package of target project
   let packageJSON;
   try {
     packageJSON = JSON.parse(readFileSync(resolve(destDir, 'package.json')));
@@ -25,6 +24,7 @@ module.exports = async () => {
     return;
   }
 
+  // check package for required dependencies
   console.log(
     colors.Reset,
     colors.FgCyan,
@@ -41,6 +41,7 @@ module.exports = async () => {
   } else {
     console.log(colors.Reset, `Installing: ${requiredDeps.join(' ')}`);
 
+    // install the required dependencies
     await exec(`npm i -D ${requiredDeps.join(' ')}`)
       .then(() => {
         console.log(
@@ -60,6 +61,6 @@ module.exports = async () => {
   console.log(colors.Reset, colors.FgCyan, 'Copying configuration files');
   // TODO: copy configs
   console.log(colors.Reset, colors.FgCyan, 'Modifying package.json');
-  // modify package with appropriate scripts
+  // TODO: modify package with appropriate scripts
   // tests?
 };
