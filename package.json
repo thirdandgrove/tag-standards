@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/grantglidewell/tag-standards.git"
+    "url": "git+https://github.com/thirdandgrove/tag-standards.git"
   },
   "author": "Third and Grove <https://www.thirdandgrove.com>",
   "contributors": [
@@ -20,9 +20,9 @@
   "preferGlobal": true,
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/grantglidewell/tag-standards/issues"
+    "url": "https://github.com/thirdandgrove/tag-standards/issues"
   },
-  "homepage": "https://github.com/grantglidewell/tag-standards#readme",
+  "homepage": "https://github.com/thirdandgrove/tag-standards#readme",
   "devDependencies": {
     "eslint": "^5.15.1",
     "eslint-config-airbnb": "^17.1.0",
