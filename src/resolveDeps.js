@@ -1,6 +1,6 @@
 const colors = require('./colors');
 
-const tagDeps = require('../tagDeps');
+const tagDeps = Object.keys(require('../package.json').devDependencies);
 
 module.exports = packageJSON => {
   const existingDeps = packageJSON.devDependencies;
