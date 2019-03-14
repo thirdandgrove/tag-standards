@@ -8,6 +8,11 @@
     "arrow-parens": "off",
     "implicit-arrow-linebreak": "off",
     "no-confusing-arrow": "off",
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "extensions": [".js", ".jsx"]
+      }
+    ]
   }
 }

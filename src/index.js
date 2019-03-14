@@ -1,5 +1,5 @@
 const { resolve } = require('path');
-const { readFileSync, writeFileSync } = require('fs');
+const { readFileSync, writeFileSync, existsSync } = require('fs');
 
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
@@ -48,9 +48,14 @@ module.exports = async () => {
     );
   } else {
     console.log(colors.Reset, `Installing: ${requiredDeps.join(' ')}`);
-
+    // check for yarn
+    const hasYarn = (cwd = process.cwd()) =>
+      existsSync(resolve(cwd, 'yarn.lock'));
+    const installCmd = hasYarn
+      ? `yarn add -D ${requiredDeps.join(' ')}`
+      : `npm i -D ${requiredDeps.join(' ')}`;
     // install the required dependencies
-    await exec(`npm i -D ${requiredDeps.join(' ')}`)
+    await exec(installCmd, { cwd: destDir })
       .then(() => {
         console.log(colors.FgGreen, 'Dependencies installed successfully');
       })
