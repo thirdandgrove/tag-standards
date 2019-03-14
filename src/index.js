@@ -41,7 +41,7 @@ module.exports = async () => {
   } else {
     console.log(colors.Reset, `Installing: ${requiredDeps.join(' ')}`);
 
-    await exec(`yarn add -D ${requiredDeps.join(' ')}`)
+    await exec(`npm i -D ${requiredDeps.join(' ')}`)
       .then(() => {
         console.log(
           colors.BgGreen,
