@@ -6,15 +6,13 @@ const exec = util.promisify(require('child_process').exec);
 
 const resolveDeps = require('./resolveDeps');
 const colors = require('./colors');
+const stdVer = require('../package.json').version;
 
 const destDir = resolve(process.cwd());
 
 module.exports = async () => {
-  console.log(
-    colors.Reset,
-    colors.FgCyan,
-    `Working in project directory: ${destDir}`
-  );
+  console.log(colors.FgCyan, `TAG-STANDARDS VERSION: ${stdVer}`);
+  console.log(colors.FgCyan, `Working in project directory: ${destDir}`);
 
   // Read package of target project
   let packageJSON;
