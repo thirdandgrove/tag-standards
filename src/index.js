@@ -20,20 +20,20 @@ module.exports = async () => {
   );
   console.log(colors.FgCyan, `Working in project directory: ${destDir}`);
 
-  // Read package of target project
+  // Read package of target project.
   let targetPackageJSON;
   try {
     targetPackageJSON = JSON.parse(
       readFileSync(resolve(destDir, 'package.json'))
     );
   } catch (err) {
-    // return early if no package is found
+    // Return early if no package is found.
     console.error(colors.FgRed, 'Unable to read package.json');
     console.error(colors.Reverse, 'Make sure you run this in the project root');
     return;
   }
 
-  // check package for required dependencies
+  // Check package for required dependencies.
   console.log(
     colors.Reset,
     colors.FgCyan,
@@ -48,7 +48,7 @@ module.exports = async () => {
     );
   } else {
     console.log(colors.Reset, `Installing: ${requiredDeps.join(' ')}`);
-    // check for yarn
+    // Check for yarn.
     const hasYarn = (cwd = process.cwd()) =>
       existsSync(resolve(cwd, 'yarn.lock'));
 
@@ -56,7 +56,7 @@ module.exports = async () => {
       ? `yarn add -D ${requiredDeps.join(' ')}`
       : `npm i -D ${requiredDeps.join(' ')}`;
 
-    // change working directory
+    // Change working directory.
     try {
       process.chdir(destDir);
       console.log(colors.FgGreen, `New directory: ${process.cwd()}`);
@@ -64,7 +64,7 @@ module.exports = async () => {
       console.log(colors.FgRed, `chdir: ${err}`);
       return;
     }
-    // install the required dependencies
+    // Install the required dependencies.
     await exec(installCmd)
       .then(() => {
         console.log(colors.FgGreen, 'Dependencies installed successfully');
@@ -77,7 +77,7 @@ module.exports = async () => {
       });
   }
 
-  // write config files to the target project
+  // Write config files to the target project.
   console.log(colors.Reset, colors.FgCyan, 'Copying configuration files');
   try {
     writeFileSync(
@@ -101,13 +101,13 @@ module.exports = async () => {
     );
   }
 
-  // add scripts to the target package
+  // Add scripts to the target package.
   console.log(colors.Reset, colors.FgCyan, 'Modifying package.json');
   try {
     const modifiedPackage = { ...targetPackageJSON };
-    // add husky pre-commit hooks
+    // Add husky pre-commit hooks.
     modifiedPackage.husky = tagStandardsPackage.husky;
-    // add lint script
+    // Add lint script.
     modifiedPackage.scripts.lint = tagStandardsPackage.scripts.lint;
     modifiedPackage.devDependencies = {
       ...tagStandardsPackage.devDependencies,
