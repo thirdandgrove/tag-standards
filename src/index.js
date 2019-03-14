@@ -1,24 +1,33 @@
 const { resolve } = require('path');
-const { readFileSync } = require('fs');
+const { readFileSync, writeFileSync } = require('fs');
 
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
 const resolveDeps = require('./resolveDeps');
 const colors = require('./colors');
-const stdVer = require('../package.json').version;
+
+const tagStandardsPackage = require('../package.json');
+const eslintConfig = require('../.eslintrc.json');
+const prettierConfig = require('../.prettierrc.json');
 
 const destDir = resolve(process.cwd());
 
 module.exports = async () => {
-  console.log(colors.FgCyan, `TAG-STANDARDS VERSION: ${stdVer}`);
+  console.log(
+    colors.FgCyan,
+    `TAG-STANDARDS VERSION: ${tagStandardsPackage.version}`
+  );
   console.log(colors.FgCyan, `Working in project directory: ${destDir}`);
 
   // Read package of target project
-  let packageJSON;
+  let targetPackageJSON;
   try {
-    packageJSON = JSON.parse(readFileSync(resolve(destDir, 'package.json')));
+    targetPackageJSON = JSON.parse(
+      readFileSync(resolve(destDir, 'package.json'))
+    );
   } catch (err) {
+    // return early if no package is found
     console.error(colors.FgRed, 'Unable to read package.json');
     console.error(colors.Reverse, 'Make sure you run this in the project root');
     return;
@@ -30,12 +39,11 @@ module.exports = async () => {
     colors.FgCyan,
     'Checking for existing dependencies'
   );
-  const requiredDeps = resolveDeps(packageJSON);
+  const requiredDeps = resolveDeps(targetPackageJSON);
 
   if (!requiredDeps.length) {
     console.log(
-      colors.FgBlack,
-      colors.BgGreen,
+      colors.FgGreen,
       'Hooray, this project already has the necessary dependencies!'
     );
   } else {
@@ -44,23 +52,62 @@ module.exports = async () => {
     // install the required dependencies
     await exec(`npm i -D ${requiredDeps.join(' ')}`)
       .then(() => {
-        console.log(
-          colors.BgGreen,
-          colors.FgBlack,
-          'Dependencies installed successfully'
-        );
+        console.log(colors.FgGreen, 'Dependencies installed successfully');
       })
       .catch(err => {
         console.error(
-          colors.Reset,
           colors.FgRed,
           `An error ocurred while installing dependencies ${err}`
         );
       });
   }
+
+  // write config files to the target project
   console.log(colors.Reset, colors.FgCyan, 'Copying configuration files');
-  // TODO: copy configs
+  try {
+    writeFileSync(
+      resolve(destDir, '.eslintrc.json'),
+      JSON.stringify(eslintConfig, null, 2)
+    );
+    writeFileSync(
+      resolve(destDir, '.prettierrc.json'),
+      JSON.stringify(prettierConfig, null, 2)
+    );
+    console.log(
+      colors.Reset,
+      colors.FgGreen,
+      'Configuration files written successfully'
+    );
+  } catch (err) {
+    console.log(
+      colors.Reset,
+      colors.FgRed,
+      `There was a problem writing the configuration files: ${err}`
+    );
+  }
+
+  // add scripts to the target package
   console.log(colors.Reset, colors.FgCyan, 'Modifying package.json');
-  // TODO: modify package with appropriate scripts
-  // tests?
+  try {
+    const modifiedPackage = { ...targetPackageJSON };
+    // add husky pre-commit hooks
+    modifiedPackage.husky = tagStandardsPackage.husky;
+    // add lint script
+    modifiedPackage.scripts.lint = tagStandardsPackage.scripts.lint;
+    writeFileSync(
+      resolve(destDir, 'package.json'),
+      JSON.stringify(modifiedPackage, null, 2)
+    );
+    console.log(
+      colors.Reset,
+      colors.FgGreen,
+      'Package.json modified successfully'
+    );
+  } catch (err) {
+    console.log(
+      colors.Reset,
+      colors.FgRed,
+      `There was a problem writing the configuration files`
+    );
+  }
 };
