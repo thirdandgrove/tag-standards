@@ -1,5 +1,5 @@
 const { resolve } = require('path');
-const { readFileSync, writeFileSync, existsSync } = require('fs');
+const { readFileSync, writeFileSync, existsSync, unlinkSync } = require('fs');
 
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
@@ -57,6 +57,7 @@ module.exports = async () => {
       console.log(FgRed, `chdir: ${err}`);
       return;
     }
+
     // Install the required dependencies.
     await exec(installCmd)
       .then(() => {
@@ -68,6 +69,34 @@ module.exports = async () => {
           `An error ocurred while installing dependencies ${err}`
         );
       });
+  }
+
+  // Check for configuration files in the target directory.
+  try {
+    const conflictingConfigs = [
+      '.eslintrc',
+      '.eslintrc.js',
+      '.eslintrc.yaml',
+      '.eslintrc.yml',
+      '.prettierrc',
+      '.prettierrc.js',
+      '.prettierrc.toml',
+      '.prettierrc.yaml',
+      '.prettierrc.yml',
+      'prettier.config.js',
+    ];
+
+    console.log(FgGreen, 'Removing configs that may conflict.');
+
+    // Remove them to prevent unwanted conflicts.
+    conflictingConfigs.map(fileName => {
+      return (
+        existsSync(resolve(destDir, fileName)) &&
+        unlinkSync(resolve(destDir, fileName))
+      );
+    });
+  } catch (err) {
+    console.log(FgRed, `There was an error removing config files: ${err}`);
   }
 
   // Write config files to the target project.
@@ -94,14 +123,25 @@ module.exports = async () => {
   console.log(Reset, FgCyan, 'Modifying package.json');
   try {
     const modifiedPackage = { ...targetPackageJSON };
-    // Add husky pre-commit hooks.
+
+    // Add husky pre-commit hooks and lint script.
     modifiedPackage.husky = tagStandardsPackage.husky;
-    // Add lint script.
     modifiedPackage.scripts.lint = tagStandardsPackage.scripts.lint;
+
+    // Add devDependencies.
     modifiedPackage.devDependencies = {
       ...tagStandardsPackage.devDependencies,
       ...modifiedPackage.devDependencies,
     };
+
+    // Remove package configs.
+    if (modifiedPackage.eslintConfig) {
+      delete modifiedPackage.eslintConfig;
+    }
+    if (modifiedPackage.prettier) {
+      delete modifiedPackage.prettier;
+    }
+
     writeFileSync(
       resolve(destDir, 'package.json'),
       JSON.stringify(modifiedPackage, null, 2)
