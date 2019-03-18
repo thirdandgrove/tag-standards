@@ -45,18 +45,16 @@ module.exports = async () => {
     const hasYarn = (cwd = process.cwd()) =>
       existsSync(resolve(cwd, 'yarn.lock'));
 
-    const installCmd = hasYarn
-      ? `yarn add -D ${requiredDeps.join(' ')}`
-      : `npm i -D ${requiredDeps.join(' ')}`;
+    // Pinned dependency versions in install command.
+    const depsWithVersions = requiredDeps
+      .map(dep => {
+        return `${dep}${tagStandardsPackage.devDependencies[dep]}`;
+      })
+      .join(' ');
 
-    // Change working directory.
-    try {
-      process.chdir(destDir);
-      console.log(FgGreen, `New directory: ${process.cwd()}`);
-    } catch (err) {
-      console.log(FgRed, `chdir: ${err}`);
-      return;
-    }
+    const installCmd = hasYarn
+      ? `yarn add -D ${depsWithVersions}`
+      : `npm i -D ${depsWithVersions}`;
 
     // Install the required dependencies.
     await exec(installCmd)
@@ -130,8 +128,8 @@ module.exports = async () => {
 
     // Add devDependencies.
     modifiedPackage.devDependencies = {
-      ...tagStandardsPackage.devDependencies,
       ...modifiedPackage.devDependencies,
+      ...tagStandardsPackage.devDependencies,
     };
 
     // Remove package configs.
@@ -154,4 +152,8 @@ module.exports = async () => {
       `There was a problem writing the configuration files`
     );
   }
+  console.log(
+    FgGreen,
+    'Configurations for TAG standards successfully installed.'
+  );
 };
