@@ -1,11 +1,11 @@
 const { resolve } = require('path');
-const { readFileSync, writeFileSync, existsSync } = require('fs');
+const { readFileSync, writeFileSync, existsSync, unlinkSync } = require('fs');
 
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
 const resolveDeps = require('./resolveDeps');
-const colors = require('./colors');
+const { FgCyan, FgGreen, FgRed, Reset, Reverse } = require('./colors');
 
 const tagStandardsPackage = require('../package.json');
 const eslintConfig = require('../.eslintrc.json');
@@ -14,11 +14,8 @@ const prettierConfig = require('../.prettierrc.json');
 const destDir = resolve(process.cwd());
 
 module.exports = async () => {
-  console.log(
-    colors.FgCyan,
-    `TAG-STANDARDS VERSION: ${tagStandardsPackage.version}`
-  );
-  console.log(colors.FgCyan, `Working in project directory: ${destDir}`);
+  console.log(FgCyan, `TAG-STANDARDS VERSION: ${tagStandardsPackage.version}`);
+  console.log(FgCyan, `Working in project directory: ${destDir}`);
 
   // Read package of target project.
   let targetPackageJSON;
@@ -28,57 +25,80 @@ module.exports = async () => {
     );
   } catch (err) {
     // Return early if no package is found.
-    console.error(colors.FgRed, 'Unable to read package.json');
-    console.error(colors.Reverse, 'Make sure you run this in the project root');
+    console.error(FgRed, 'Unable to read package.json');
+    console.error(Reverse, 'Make sure you run this in the project root');
     return;
   }
 
   // Check package for required dependencies.
-  console.log(
-    colors.Reset,
-    colors.FgCyan,
-    'Checking for existing dependencies'
-  );
+  console.log(Reset, FgCyan, 'Checking for existing dependencies');
   const requiredDeps = resolveDeps(targetPackageJSON);
 
   if (!requiredDeps.length) {
     console.log(
-      colors.FgGreen,
+      FgGreen,
       'Hooray, this project already has the necessary dependencies!'
     );
   } else {
-    console.log(colors.Reset, `Installing: ${requiredDeps.join(' ')}`);
+    console.log(Reset, `Installing: ${requiredDeps.join(' ')}`);
     // Check for yarn.
     const hasYarn = (cwd = process.cwd()) =>
       existsSync(resolve(cwd, 'yarn.lock'));
 
-    const installCmd = hasYarn
-      ? `yarn add -D ${requiredDeps.join(' ')}`
-      : `npm i -D ${requiredDeps.join(' ')}`;
+    // Pinned dependency versions in install command.
+    const depsWithVersions = requiredDeps
+      .map(dep => {
+        return `${dep}${tagStandardsPackage.devDependencies[dep]}`;
+      })
+      .join(' ');
 
-    // Change working directory.
-    try {
-      process.chdir(destDir);
-      console.log(colors.FgGreen, `New directory: ${process.cwd()}`);
-    } catch (err) {
-      console.log(colors.FgRed, `chdir: ${err}`);
-      return;
-    }
+    const installCmd = hasYarn
+      ? `yarn add -D ${depsWithVersions}`
+      : `npm i -D ${depsWithVersions}`;
+
     // Install the required dependencies.
     await exec(installCmd)
       .then(() => {
-        console.log(colors.FgGreen, 'Dependencies installed successfully');
+        console.log(FgGreen, 'Dependencies installed successfully');
       })
       .catch(err => {
         console.error(
-          colors.FgRed,
+          FgRed,
           `An error ocurred while installing dependencies ${err}`
         );
       });
   }
 
+  // Check for configuration files in the target directory.
+  try {
+    const conflictingConfigs = [
+      '.eslintrc',
+      '.eslintrc.js',
+      '.eslintrc.yaml',
+      '.eslintrc.yml',
+      '.prettierrc',
+      '.prettierrc.js',
+      '.prettierrc.toml',
+      '.prettierrc.yaml',
+      '.prettierrc.yml',
+      'prettier.config.js',
+    ];
+
+    console.log(FgGreen, 'Removing configs that may conflict.');
+
+    // Remove them to prevent unwanted conflicts.
+    conflictingConfigs.map(fileName => {
+      return (
+        existsSync(resolve(destDir, fileName)) &&
+        unlinkSync(resolve(destDir, fileName))
+      );
+    });
+  } catch (err) {
+    console.log(FgRed, `There was an error removing config files: ${err}`);
+  }
+
   // Write config files to the target project.
-  console.log(colors.Reset, colors.FgCyan, 'Copying configuration files');
+  console.log(Reset, FgCyan, 'Copying configuration files');
   try {
     writeFileSync(
       resolve(destDir, '.eslintrc.json'),
@@ -88,45 +108,52 @@ module.exports = async () => {
       resolve(destDir, '.prettierrc.json'),
       JSON.stringify(prettierConfig, null, 2)
     );
-    console.log(
-      colors.Reset,
-      colors.FgGreen,
-      'Configuration files written successfully'
-    );
+    console.log(Reset, FgGreen, 'Configuration files written successfully');
   } catch (err) {
     console.log(
-      colors.Reset,
-      colors.FgRed,
+      Reset,
+      FgRed,
       `There was a problem writing the configuration files: ${err}`
     );
   }
 
   // Add scripts to the target package.
-  console.log(colors.Reset, colors.FgCyan, 'Modifying package.json');
+  console.log(Reset, FgCyan, 'Modifying package.json');
   try {
     const modifiedPackage = { ...targetPackageJSON };
-    // Add husky pre-commit hooks.
+
+    // Add husky pre-commit hooks and lint script.
     modifiedPackage.husky = tagStandardsPackage.husky;
-    // Add lint script.
     modifiedPackage.scripts.lint = tagStandardsPackage.scripts.lint;
+
+    // Add devDependencies.
     modifiedPackage.devDependencies = {
-      ...tagStandardsPackage.devDependencies,
       ...modifiedPackage.devDependencies,
+      ...tagStandardsPackage.devDependencies,
     };
+
+    // Remove package configs.
+    if (modifiedPackage.eslintConfig) {
+      delete modifiedPackage.eslintConfig;
+    }
+    if (modifiedPackage.prettier) {
+      delete modifiedPackage.prettier;
+    }
+
     writeFileSync(
       resolve(destDir, 'package.json'),
       JSON.stringify(modifiedPackage, null, 2)
     );
-    console.log(
-      colors.Reset,
-      colors.FgGreen,
-      'Package.json modified successfully'
-    );
+    console.log(Reset, FgGreen, 'Package.json modified successfully');
   } catch (err) {
     console.log(
-      colors.Reset,
-      colors.FgRed,
+      Reset,
+      FgRed,
       `There was a problem writing the configuration files`
     );
   }
+  console.log(
+    FgGreen,
+    'Configurations for TAG standards successfully installed.'
+  );
 };

@@ -1,6 +1,6 @@
 const colors = require('./colors');
 
-const tagDeps = Object.keys(require('../package.json').devDependencies);
+const tagDeps = require('../package.json').devDependencies;
 
 module.exports = packageJSON => {
   const existingDeps = packageJSON.devDependencies;
@@ -13,8 +13,8 @@ module.exports = packageJSON => {
     return tagDeps;
   }
 
-  const installQueue = tagDeps.filter(dep =>
-    existingDeps[dep]
+  const installQueue = Object.keys(tagDeps).filter(dep =>
+    existingDeps[dep] && existingDeps[dep] === tagDeps[dep]
       ? console.log(colors.FgYellow, `${dep} is installed, skipping.`)
       : dep
   );
