@@ -50,7 +50,9 @@ module.exports = async () => {
     // Pinned dependency versions in install command.
     const depsWithVersions = requiredDeps
       .map(dep => {
-        return `${dep}${tagStandardsPackage.devDependencies[dep]}`;
+        return `${dep}@${tagStandardsPackage.devDependencies[dep].substring(
+          1
+        )}`;
       })
       .join(' ');
 
