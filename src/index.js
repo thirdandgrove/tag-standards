@@ -32,7 +32,10 @@ module.exports = async () => {
 
   // Check package for required dependencies.
   console.log(Reset, FgCyan, 'Checking for existing dependencies');
-  const requiredDeps = resolveDeps(targetPackageJSON);
+  const requiredDeps = resolveDeps(
+    targetPackageJSON,
+    tagStandardsPackage.devDependencies
+  );
 
   if (!requiredDeps.length) {
     console.log(

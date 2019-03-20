@@ -1,8 +1,6 @@
 const colors = require('./colors');
 
-const tagDeps = require('../package.json').devDependencies;
-
-module.exports = packageJSON => {
+module.exports = (packageJSON, tagDeps) => {
   const existingDeps = packageJSON.devDependencies;
 
   if (!existingDeps) {
