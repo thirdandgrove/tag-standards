@@ -45,8 +45,7 @@ module.exports = async () => {
   } else {
     console.log(Reset, `Installing: ${requiredDeps.join(' ')}`);
     // Check for yarn.
-    const hasYarn = (cwd = process.cwd()) =>
-      existsSync(resolve(cwd, 'yarn.lock'));
+    const hasYarn = existsSync(resolve(destDir, 'yarn.lock'));
 
     // Pinned dependency versions in install command.
     const depsWithVersions = requiredDeps

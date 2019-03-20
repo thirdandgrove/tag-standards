@@ -8,7 +8,7 @@ module.exports = (packageJSON, tagDeps) => {
       colors.FgYellow,
       'No Dev Dependencies installed, installing all required dependencies.'
     );
-    return tagDeps;
+    return Object.keys(tagDeps);
   }
 
   const installQueue = Object.keys(tagDeps).filter(dep =>
