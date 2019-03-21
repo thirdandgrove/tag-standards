@@ -1,8 +1,6 @@
 const colors = require('./colors');
 
-const tagDeps = require('../package.json').devDependencies;
-
-module.exports = packageJSON => {
+module.exports = (packageJSON, tagDeps) => {
   const existingDeps = packageJSON.devDependencies;
 
   if (!existingDeps) {
@@ -10,7 +8,7 @@ module.exports = packageJSON => {
       colors.FgYellow,
       'No Dev Dependencies installed, installing all required dependencies.'
     );
-    return tagDeps;
+    return Object.keys(tagDeps);
   }
 
   const installQueue = Object.keys(tagDeps).filter(dep =>

@@ -32,7 +32,10 @@ module.exports = async () => {
 
   // Check package for required dependencies.
   console.log(Reset, FgCyan, 'Checking for existing dependencies');
-  const requiredDeps = resolveDeps(targetPackageJSON);
+  const requiredDeps = resolveDeps(
+    targetPackageJSON,
+    tagStandardsPackage.devDependencies
+  );
 
   if (!requiredDeps.length) {
     console.log(
@@ -42,13 +45,14 @@ module.exports = async () => {
   } else {
     console.log(Reset, `Installing: ${requiredDeps.join(' ')}`);
     // Check for yarn.
-    const hasYarn = (cwd = process.cwd()) =>
-      existsSync(resolve(cwd, 'yarn.lock'));
+    const hasYarn = existsSync(resolve(destDir, 'yarn.lock'));
 
     // Pinned dependency versions in install command.
     const depsWithVersions = requiredDeps
       .map(dep => {
-        return `${dep}${tagStandardsPackage.devDependencies[dep]}`;
+        return `${dep}@${tagStandardsPackage.devDependencies[dep].substring(
+          1
+        )}`;
       })
       .join(' ');
 
