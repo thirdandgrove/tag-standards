@@ -128,7 +128,12 @@ module.exports = async () => {
 
     // Add husky pre-commit hooks and lint script.
     modifiedPackage.husky = tagStandardsPackage.husky;
-    modifiedPackage.scripts.lint = tagStandardsPackage.scripts.lint;
+    if (modifiedPackage.scripts) {
+      modifiedPackage.scripts.lint = tagStandardsPackage.scripts.lint;
+    } else {
+      modifiedPackage.scripts = {};
+      modifiedPackage.scripts.lint = tagStandardsPackage.scripts.lint;
+    }
 
     // Add devDependencies.
     modifiedPackage.devDependencies = {
@@ -150,11 +155,7 @@ module.exports = async () => {
     );
     console.log(Reset, FgGreen, 'Package.json modified successfully');
   } catch (err) {
-    console.log(
-      Reset,
-      FgRed,
-      `There was a problem writing the configuration files`
-    );
+    console.log(Reset, FgRed, `There was a problem modifying the package file`);
   }
   console.log(
     FgGreen,
