@@ -4,7 +4,7 @@
   "description": "coding standards for tag js projects",
   "main": "index.js",
   "scripts": {
-    "lint": "node ./node_modules/eslint/bin/eslint ."
+    "lint": "node ./node_modules/eslint/bin/eslint . --ignore-path .gitignore"
   },
   "repository": {
     "type": "git",
