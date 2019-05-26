@@ -18,14 +18,15 @@ const destDir = resolve(process.cwd());
 module.exports = async () => {
   console.log(FgCyan, `TAG-STANDARDS VERSION: ${tagStandardsPackage.version}`);
   console.log(FgCyan, `Working in project directory: ${destDir}`);
-  const confirm = await prompt({
+
+  const confirmation = await prompt({
     type: 'confirm',
     name: 'confirm',
     default: true,
     message:
       'This will permanently modify your project, are you sure you want to continue?',
-  }).confirm;
-  if (!confirm) {
+  }).then(response => response.confirm);
+  if (!confirmation) {
     return;
   }
   // Read package of target project.
