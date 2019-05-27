@@ -1,13 +1,14 @@
 /* eslint-disable no-console */
 const { resolve } = require('path');
 const { readFileSync, writeFileSync, existsSync, unlinkSync } = require('fs');
-
 const util = require('util');
+const inquirer = require('inquirer');
+
+const prompt = inquirer.createPromptModule();
 const exec = util.promisify(require('child_process').exec);
 
-const resolveDeps = require('./resolveDeps');
 const { FgCyan, FgGreen, FgRed, Reset, Reverse } = require('./colors');
-
+const resolveDeps = require('./resolveDeps');
 const tagStandardsPackage = require('../package.json');
 const eslintConfig = require('../.eslintrc.json');
 const prettierConfig = require('../.prettierrc.json');
@@ -18,6 +19,16 @@ module.exports = async () => {
   console.log(FgCyan, `TAG-STANDARDS VERSION: ${tagStandardsPackage.version}`);
   console.log(FgCyan, `Working in project directory: ${destDir}`);
 
+  const confirmation = await prompt({
+    type: 'confirm',
+    name: 'confirm',
+    default: true,
+    message:
+      'This will permanently modify your project, are you sure you want to continue?',
+  }).then(response => response.confirm);
+  if (!confirmation) {
+    return;
+  }
   // Read package of target project.
   let targetPackageJSON;
   try {
@@ -125,7 +136,12 @@ module.exports = async () => {
   // Add scripts to the target package.
   console.log(Reset, FgCyan, 'Modifying package.json');
   try {
-    const modifiedPackage = { ...targetPackageJSON };
+    // Read package of target project.
+    const postInstallPackageJSON = JSON.parse(
+      readFileSync(resolve(destDir, 'package.json'))
+    );
+
+    const modifiedPackage = { ...postInstallPackageJSON };
 
     // Add husky pre-commit hooks and lint script.
     modifiedPackage.husky = tagStandardsPackage.husky;
@@ -135,12 +151,6 @@ module.exports = async () => {
       modifiedPackage.scripts = {};
       modifiedPackage.scripts.lint = tagStandardsPackage.scripts.lint;
     }
-
-    // Add devDependencies.
-    modifiedPackage.devDependencies = {
-      ...modifiedPackage.devDependencies,
-      ...tagStandardsPackage.devDependencies,
-    };
 
     // Remove package configs.
     if (modifiedPackage.eslintConfig) {
