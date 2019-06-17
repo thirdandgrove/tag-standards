@@ -8,7 +8,7 @@
     "node": true,
     "es6": true
   },
-  "plugins": ["prettier"],
+  "plugins": ["prettier", "react-hooks"],
   "extends": ["airbnb", "plugin:prettier/recommended", "prettier/react"],
   "rules": {
     "arrow-parens": "off",
@@ -27,6 +27,8 @@
       {
         "extensions": [".js"]
       }
-    ]
+    ],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }
