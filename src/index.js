@@ -2,16 +2,19 @@
 const { resolve } = require('path');
 const { readFileSync, writeFileSync, existsSync, unlinkSync } = require('fs');
 const util = require('util');
+const childProcess = require('child_process');
+
 const inquirer = require('inquirer');
 
-const prompt = inquirer.createPromptModule();
-const exec = util.promisify(require('child_process').exec);
-
-const { FgCyan, FgGreen, FgRed, Reset, Reverse } = require('./colors');
-const resolveDeps = require('./resolveDeps');
-const tagStandardsPackage = require('../package.json');
 const eslintConfig = require('../.eslintrc.json');
+const tagStandardsPackage = require('../package.json');
 const prettierConfig = require('../.prettierrc.json');
+
+const resolveDeps = require('./resolveDeps');
+const { FgCyan, FgGreen, FgRed, Reset, Reverse } = require('./colors');
+
+const prompt = inquirer.createPromptModule();
+const exec = util.promisify(childProcess.exec);
 
 const destDir = resolve(process.cwd());
 
