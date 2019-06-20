@@ -15,6 +15,29 @@
 - prettier
 - pretty-quick
 
+## Requirements
+
+ensure that your editor has the proper packages/extensions installed and configured.
+
+#### Sublime
+```
+JSPrettier
+Eslint
+```
+
+#### Atom
+```
+linter
+linter-eslint
+prettier-atom
+```
+
+#### VSCode
+```
+ESLint
+Prettier - Code formatter
+```
+
 ## Usage
 
 no need to install, just run the binary in the root of your project through `npx` and you're good to go!
