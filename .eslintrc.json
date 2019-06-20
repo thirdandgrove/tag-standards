@@ -13,6 +13,7 @@
   "rules": {
     "arrow-parens": "off",
     "implicit-arrow-linebreak": "off",
+    "import/order": ["warn", { "newlines-between": "always" }],
     "no-console": 1,
     "no-confusing-arrow": "off",
     "no-unused-vars": 1,
