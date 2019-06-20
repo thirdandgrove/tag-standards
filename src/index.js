@@ -172,4 +172,5 @@ module.exports = async () => {
     FgGreen,
     'Configurations for TAG standards successfully installed.'
   );
+  process.exit();
 };

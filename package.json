@@ -1,6 +1,6 @@
 {
   "name": "tag-standards",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "coding standards for tag js projects",
   "main": "index.js",
   "scripts": {
